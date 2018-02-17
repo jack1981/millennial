@@ -13,8 +13,9 @@ ncol(data)
 dim(data)
 head(data,3)
 str(data)
-summary(data)
 attributes(data)
+names(data)
+summary(data)
 # factors analysis
 library(Hmisc)
 describe(data[,1:30])
@@ -36,12 +37,34 @@ spend <- which( 1:p %% 2 == 1 )[-1]
 data_v <- data[,visit]
 data_s <- data[,spend]
 
+mystats <- function(x) {
+  nmiss<-sum(is.na(x))
+  a <- x[!is.na(x)]
+  m <- mean(a)
+  n <- length(a)
+  s <- sd(a)
+  min <- min(a)
+  pctls<-quantile(a,probs=c(0.01, 0.05,0.1,0.25,0.5,0.75,0.9,0.95,0.99))
+  max <- max(a)
+  return(c(n=n, nmiss=nmiss,  mean=m, stdev=s,min = min, pctls=pctls,max=max))
+}
+
 # ---- visit ----
 dim(data_v)
 head(data_v,3)
 str(data_v)
 summary(data_v)
 attributes(data_v)
+
+
+diag_stats<-t(data.frame(apply(data_v[,-1], 2, FUN = mystats)))
+write.csv(diag_stats, "C:/Data/diag_stats.csv")
+## FACTOR ANALYSIS 
+corrm<- cor(scaleDataV)
+### DECIDING NUMBER OF FACTORS USING SCREE PLOT & EIGEN VALUES OVER 1
+require(psych)
+scree(corrm, factors=T, pc=T, main="scree plot", hline=NULL, add=FALSE) ### SCREE PLOT
+
 
 #-------------------------
 # ralphlauren_visit vs. guess_visit

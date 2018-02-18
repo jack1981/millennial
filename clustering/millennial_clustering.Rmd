@@ -1,13 +1,29 @@
+---
+title: "millennial_clustering"
+author: "suqiang_song"
+date: "February 17, 2018"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
 #install.packages("factoextra")
+```{r eval=TRUE}
 library(factoextra) # clustering algorithms & visualization
-# ---- Read in the data ----
+```
 
+# ---- Read in the data ----
+```{r eval=TRUE}
 data <- read.table('C:/Data/millennial')
 col <- read.table('C:/Data/millennial_column')
 colnames(data) <- col$V2
-
+```
 # ---- Sample/separate data ----
-
+```{r eval=TRUE}
 n <- dim(data)[1]
 p <- dim(data)[2]
 
@@ -23,31 +39,29 @@ data_vs <- data
 visit_vars<-c("google_visit","apple_visit","jcrew_visit","itunes_visit")
 spend_vars<-c("google_aveSpend","apple_aveSpend","jcrew_aveSpend","itunes_aveSpend")
 visit_spend_vars<-c("google_visit","apple_visit","jcrew_visit","itunes_visit","google_aveSpend","apple_aveSpend","jcrew_aveSpend","itunes_aveSpend")
-
-names(data_v)
-names(data_s)
-names(data_vs)
 # scale the data sets
 scaleDataV=scale(data_v[,-1])
 scaleDataS=scale(data_s[,-1])
 scaleDataVS=scale(data_vs[,-1])
-
-
-#View(scaleDataV)
+```
 # define the UDF wssplot which helps to find best K
-wssplot <- function(data, nc=15, seed=1234){
+```{r eval=TRUE}
+wssplot <- function(data, nc=15, seed=123){
   wss <- (nrow(data)-1)*sum(apply(data,2,var))
   for (i in 2:nc){
     set.seed(seed)
     wss[i] <- sum(kmeans(data, centers=i)$withinss)}
   plot(1:nc, wss, type="b", xlab="Number of Clusters",
        ylab="Within groups sum of squares")}
-
+```
 # define the UDF for cluster
+```{r eval=TRUE}
 doCluster <- function(scaleData,bestk=10,iterMax=500,nstart=15) {
   return (kmeans(scaleData, bestk,iterMax,nstart))
 }
+```
 # define the UDF findBiggestCluster
+```{r eval=TRUE}
 findBiggestCluster <- function(rawData,scaleData,bestk=10,iterMax=500,nstart=15) {
   k_out <- doCluster(scaleData,bestk,iterMax,nstart)
   table(k_out$cluster)
@@ -57,8 +71,9 @@ findBiggestCluster <- function(rawData,scaleData,bestk=10,iterMax=500,nstart=15)
   tapply(total, mil, summary)
   list(k_out=k_out,d_out=rawData[is.element(k_out$cluster, (1:bestk)[-neg]),1],neg=neg)
 }
-
-# === use visit ===
+```
+# === clustering with user visit ===
+```{r eval=TRUE}
 # find the best k from SSE
 wssv1 <- wssplot(scaleDataV)
 #best_v
@@ -86,9 +101,9 @@ k_v_par <- doCluster(data_par_v,best_v2)
 fviz_cluster(k_v_par, data = data_par_v)
 # save the final result to csv
 write.csv(millennial_v_final, "C:/Data/millennial_v_final.csv")
-
-
-# === use spend ===
+```
+# === clustering with user avgSpend ===
+```{r eval=TRUE}
 # find the best k from SSE
 wsss1 <- wssplot(scaleDataS)
 #best_s
@@ -114,8 +129,9 @@ k_s_par <- doCluster(data_par_s,best_s2)
 fviz_cluster(k_s_par, data = data_par_s)
 # save the final result to csv
 write.csv(millennial_s_final, "C:/Data/millennial_s_final.csv")
-
-# === use visit+spend ===
+```
+# === clustering with user visit+avgSpend ===
+```{r eval=TRUE}
 # find the best k from SSE
 wssvs1 <- wssplot(scaleDataVS)
 #best_vs
@@ -141,5 +157,4 @@ k_vs_par <- doCluster(data_par_vs,best_vs2)
 fviz_cluster(k_vs_par, data = data_par_vs)
 # save the final result to csv
 write.csv(millennial_vs_final, "C:/Data/millennial_vs_final.csv")
-
-
+```
